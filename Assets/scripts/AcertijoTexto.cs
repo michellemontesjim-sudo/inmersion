@@ -46,6 +46,11 @@ public class AcertijoTexto : MonoBehaviour
 
     private bool yaResuelto = false;
 
+    public AcertijoInmersivo animadorCamara;
+
+    [Header("Efectos Visuales")]
+    public EfectoFocusUI controladorFocus;
+
     private void Awake()
     {
         audioSource = GetComponent<AudioSource>();
@@ -87,8 +92,29 @@ public class AcertijoTexto : MonoBehaviour
         AbrirPanelAcertijo();
     }
 
+    // Método que se llama desde OnMouseDown o botones
     public void AbrirPanelAcertijo()
     {
+        StartCoroutine(SecuenciaAbrirPanelConZoom());
+    }
+
+    private IEnumerator SecuenciaAbrirPanelConZoom()
+    {
+        // 1. Iniciar la animación de la cámara (Zoom / Acercamiento)
+        if (animadorCamara != null)
+        {
+            animadorCamara.EnfocarObjeto();
+        }
+
+        if (controladorFocus != null)
+        {
+            controladorFocus.ActivarDesenfoque();
+        }
+
+        // 2. Esperar 1 segundo mientras se realiza el zoom de la cámara
+        yield return new WaitForSeconds(1.0f);
+
+        // 3. Abrir la interfaz UI del acertijo
         if (panelAcertijoUI != null)
         {
             panelAcertijoUI.SetActive(true);
@@ -102,6 +128,7 @@ public class AcertijoTexto : MonoBehaviour
             if (textoFeedback != null)
                 textoFeedback.text = "";
 
+            // Reproducir sonido al abrir la UI
             if (sonidoAbrirPanel != null && audioSource != null)
             {
                 audioSource.clip = sonidoAbrirPanel;
@@ -112,14 +139,27 @@ public class AcertijoTexto : MonoBehaviour
 
     public void CerrarPanelAcertijo()
     {
+        // Ocultar el panel UI inmediatamente
         if (panelAcertijoUI != null)
         {
             panelAcertijoUI.SetActive(false);
         }
 
+        // Detener audio
         if (audioSource != null && audioSource.isPlaying)
         {
             audioSource.Stop();
+        }
+
+        // Regresar la cámara a su posición original
+        if (animadorCamara != null)
+        {
+            animadorCamara.DesenfoqueObjeto();
+        }
+
+        if (controladorFocus != null)
+        {
+            controladorFocus.DesactivarDesenfoque();
         }
     }
 
