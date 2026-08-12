@@ -168,6 +168,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemId: hilo
+  prefabModelo3DInspeccion: {fileID: 919132149155446097, guid: 9637ace6e095b56449e37fbe4a299679, type: 3}
+  newPrefab3D: {fileID: 0}
 --- !u!61 &339335809
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -313,6 +315,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemId: "piedraPeque\xF1a"
+  prefabModelo3DInspeccion: {fileID: 919132149155446097, guid: 3f271596b4881994ebd5a29090236ec0, type: 3}
+  newPrefab3D: {fileID: 0}
 --- !u!61 &387091199
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -484,6 +488,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemId: cuerda
+  prefabModelo3DInspeccion: {fileID: 919132149155446097, guid: 38544ff3db631324abd063a09a03b051, type: 3}
+  newPrefab3D: {fileID: 0}
 --- !u!61 &740789606
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -596,6 +602,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 2.6}
+--- !u!1 &748623887
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 748623889}
+  - component: {fileID: 748623888}
+  m_Layer: 0
+  m_Name: dialogoEntrada
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &748623888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 748623887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17cd88d39849d0f478da1a930e015aa7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  uniqueIDDialogo: dialogoEntradaCocina
+  mensajeEntrada: "Todo se ve tan solitario... \xBFpor qu\xE9 al ver este lugar se
+    me hace tan...familiar? Como si ya hubiera estado aqu\xED antes...Bueno mejor
+    veo que puedo hacer..."
+  delayInicial: 1.2
+--- !u!4 &748623889
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 748623887}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.309468, y: -0.53210384, z: -9.94539}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1035251600
 GameObject:
   m_ObjectHideFlags: 0
@@ -782,6 +837,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemId: ramaPalo
+  prefabModelo3DInspeccion: {fileID: 919132149155446097, guid: facf80262216a5549a547072f8ccbcfd, type: 3}
+  newPrefab3D: {fileID: 0}
 --- !u!61 &1622567026
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1008,7 +1065,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uniqueID: grieta_de_cocina
   mensajeInspeccion: "Parece que hay un objeto aqu\xED... Obtuviste cinta"
+  prefabModelo3DObjeto: {fileID: 0}
   prefabRecompensa: {fileID: 9133905642434056505, guid: fcf89e76ea40fa34c8370b1968d728cb, type: 3}
+  prefabModelo3DRecompensa: {fileID: 919132149155446097, guid: 6356a2a7bc3c1c942a67c1f257ff2c07, type: 3}
   darRecompensaUnaSolaVez: 1
   mensajeYaInspeccionado: "La grieta ya est\xE1 vac\xEDa."
 --- !u!61 &1908470420
@@ -1102,6 +1161,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemId: frascoDeLimpiador
+  prefabModelo3DInspeccion: {fileID: 919132149155446097, guid: c218343c7d0fafe48b57096be9f8b46f, type: 3}
+  newPrefab3D: {fileID: 0}
 --- !u!61 &2133752463
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -1323,3 +1384,4 @@ SceneRoots:
   - {fileID: 1622567028}
   - {fileID: 740789608}
   - {fileID: 339335811}
+  - {fileID: 748623889}

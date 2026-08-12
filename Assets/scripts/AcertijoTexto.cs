@@ -42,7 +42,7 @@ public class AcertijoTexto : MonoBehaviour
     public string nombreEscenaFinal = "EscenaFinal";
 
     [Tooltip("Segundos de espera mostrando el mensaje/recompensa antes de cambiar de escena.")]
-    public float tiempoEsperaTransicion = 3.0f;
+    public float tiempoEsperaTransicion = 3.5f;
 
     private bool yaResuelto = false;
 
@@ -92,7 +92,6 @@ public class AcertijoTexto : MonoBehaviour
         AbrirPanelAcertijo();
     }
 
-    // Método que se llama desde OnMouseDown o botones
     public void AbrirPanelAcertijo()
     {
         StartCoroutine(SecuenciaAbrirPanelConZoom());
@@ -100,7 +99,6 @@ public class AcertijoTexto : MonoBehaviour
 
     private IEnumerator SecuenciaAbrirPanelConZoom()
     {
-        // 1. Iniciar la animación de la cámara (Zoom / Acercamiento)
         if (animadorCamara != null)
         {
             animadorCamara.EnfocarObjeto();
@@ -111,10 +109,8 @@ public class AcertijoTexto : MonoBehaviour
             controladorFocus.ActivarDesenfoque();
         }
 
-        // 2. Esperar 1 segundo mientras se realiza el zoom de la cámara
         yield return new WaitForSeconds(1.0f);
 
-        // 3. Abrir la interfaz UI del acertijo
         if (panelAcertijoUI != null)
         {
             panelAcertijoUI.SetActive(true);
@@ -128,7 +124,6 @@ public class AcertijoTexto : MonoBehaviour
             if (textoFeedback != null)
                 textoFeedback.text = "";
 
-            // Reproducir sonido al abrir la UI
             if (sonidoAbrirPanel != null && audioSource != null)
             {
                 audioSource.clip = sonidoAbrirPanel;
@@ -139,19 +134,16 @@ public class AcertijoTexto : MonoBehaviour
 
     public void CerrarPanelAcertijo()
     {
-        // Ocultar el panel UI inmediatamente
         if (panelAcertijoUI != null)
         {
             panelAcertijoUI.SetActive(false);
         }
 
-        // Detener audio
         if (audioSource != null && audioSource.isPlaying)
         {
             audioSource.Stop();
         }
 
-        // Regresar la cámara a su posición original
         if (animadorCamara != null)
         {
             animadorCamara.DesenfoqueObjeto();
@@ -174,31 +166,28 @@ public class AcertijoTexto : MonoBehaviour
         {
             yaResuelto = true;
 
+            // Guardar en la persistencia de escena
             if (!string.IsNullOrEmpty(uniqueID) && SceneStateManager.Instance != null)
             {
                 SceneStateManager.Instance.RegistrarObjetoRecogido(uniqueID);
             }
 
-            if (audioSource != null && audioSource.isPlaying)
-            {
-                audioSource.Stop();
-            }
-
+            // Cerrar el panel del acertijo y quitar zoom/desenfoque
             CerrarPanelAcertijo();
 
-            // 1. Muestra el mensaje de éxito en pantalla
+            // 1. Mostrar el mensaje de éxito mediante el RecetaManager (máquina de escribir)
             if (RecetaManager.Instance != null && !string.IsNullOrEmpty(mensajeExito))
             {
                 RecetaManager.Instance.ShowDialog(mensajeExito);
             }
 
-            // 2. Entrega el objeto al inventario
+            // 2. Entregar objeto recompensa al inventario
             if (prefabRecompensa != null)
             {
                 EntregarRecompensa();
             }
 
-            // 3. Inicia la corrutina que da tiempo a leer antes de cambiar de escena
+            // 3. Si debe ir a la escena final, iniciar la secuencia con espera y Fade Out
             if (irAEscenaFinal && !string.IsNullOrEmpty(nombreEscenaFinal))
             {
                 StartCoroutine(CargarEscenaFinalConDelay());
@@ -230,10 +219,23 @@ public class AcertijoTexto : MonoBehaviour
 
     private IEnumerator CargarEscenaFinalConDelay()
     {
-        // Espera los segundos configurados para que el jugador lea el mensaje y vea la recompensa
+        // Espera los segundos configurados para que el jugador lea el texto y vea la recompensa en el inventario
         yield return new WaitForSeconds(tiempoEsperaTransicion);
 
-        // Carga la escena final directamente (se limpiará la UI automáticamente)
-        SceneManager.LoadScene(nombreEscenaFinal);
+        // Ocultar el cuadro de diálogo antes de la transición
+        if (RecetaManager.Instance != null)
+        {
+            RecetaManager.Instance.CloseDialog();
+        }
+
+        // Cambiar a la escena final con la transición Fade Out de SceneChanger
+        if (SceneChanger.Instance != null)
+        {
+            SceneChanger.Instance.CambiarAEscena(nombreEscenaFinal);
+        }
+        else
+        {
+            SceneManager.LoadScene(nombreEscenaFinal);
+        }
     }
 }

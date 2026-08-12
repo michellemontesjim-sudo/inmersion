@@ -80,4 +80,25 @@ public class SceneChanger : MonoBehaviour
             panelNegro.DOFade(0f, duracionFade);
         }
     }
+
+    private void OnEnable()
+    {
+        // Escucha cada vez que Unity carga una escena nueva
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += AlCargarNuevaEscena;
+    }
+
+    private void OnDisable()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= AlCargarNuevaEscena;
+    }
+
+    private void AlCargarNuevaEscena(UnityEngine.SceneManagement.Scene escena, UnityEngine.SceneManagement.LoadSceneMode modo)
+    {
+        // Busca si en la nueva escena existe un controlador de Focus
+        EfectoFocusUI focus = FindObjectOfType<EfectoFocusUI>();
+        if (focus != null)
+        {
+            focus.DesactivarDesenfoqueInmediato();
+        }
+    }
 }

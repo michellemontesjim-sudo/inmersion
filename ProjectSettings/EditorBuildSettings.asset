@@ -18,6 +18,12 @@ EditorBuildSettings:
     path: Assets/Scenes/acertijo.unity
     guid: cc79a897e98ef314db87c91e903ad2f7
   - enabled: 1
+    path: Assets/Scenes/recuerdoescena.unity
+    guid: aac3bdd8827c0904aa38b3ca31560748
+  - enabled: 1
+    path: Assets/Scenes/escenaPreFinal.unity
+    guid: 0f7133317a3cf41428b31092eac5e5c8
+  - enabled: 1
     path: Assets/Scenes/EscenaFinal.unity
     guid: dfe255f406a05974ba47a1e5f1188737
   m_configObjects: {}

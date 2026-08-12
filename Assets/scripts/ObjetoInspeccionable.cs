@@ -1,32 +1,39 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
-using System.Xml;
 using UnityEngine;
 
 [RequireComponent(typeof(Collider2D))]
 public class ObjetoInspeccionable : MonoBehaviour
 {
-    [Header("Identificador ⁄nico")]
-    [Tooltip("ID ˙nico para este contenedor/grieta (Ej: Grieta_Habitacion_01)")]
+    [Header("Identificador √önico")]
+    [Tooltip("ID √∫nico para este contenedor/grieta (Ej: Grieta_Habitacion_01)")]
     public string uniqueID;
 
-    [Header("Mensaje de Di·logo")]
+    [Header("Mensaje de Di√°logo")]
     [TextArea(2, 4)]
-    public string mensajeInspeccion = "No parece haber nada interesante aquÌ...";
+    public string mensajeInspeccion = "No parece haber nada interesante aqu√≠...";
+
+    [Header("Inspecci√≥n 3D del Contenedor (Opcional)")]
+    [Tooltip("Modelo 3D que se mostrar√° en pantalla grande al examinar este objeto/grieta en la escena")]
+    public GameObject prefabModelo3DObjeto;
 
     [Header("Recompensa (Opcional)")]
-    public GameObject prefabRecompensa; // Objeto que ir· al inventario (ej: Llave)
+    public GameObject prefabRecompensa; // Objeto que ir√° al inventario (ej: Llave)
+
+    [Tooltip("Modelo 3D que tendr√° el objeto entregado para cuando el jugador lo inspeccione en su inventario")]
+    public GameObject prefabModelo3DRecompensa;
+
     public bool darRecompensaUnaSolaVez = true;
 
     [Header("Mensaje tras recoger la recompensa")]
     [TextArea(2, 4)]
-    public string mensajeYaInspeccionado = "La grieta ya est· vacÌa.";
+    public string mensajeYaInspeccionado = "La grieta ya est√° vac√≠a.";
 
     private bool yaFueRecompensado = false;
 
     private void Start()
     {
-        // Al cargar o regresar a la escena, consultamos si este objeto ya entregÛ su recompensa
+        // Al cargar o regresar a la escena, consultamos si este objeto ya entreg√≥ su recompensa
         if (!string.IsNullOrEmpty(uniqueID) && SceneStateManager.Instance != null)
         {
             if (SceneStateManager.Instance.EstaRecogido(uniqueID))
@@ -40,7 +47,7 @@ public class ObjetoInspeccionable : MonoBehaviour
     {
         if (RecetaManager.Instance == null) return;
 
-        // Caso 1: Ya entregÛ la recompensa anteriormente
+        // Caso 1: Ya entreg√≥ la recompensa anteriormente
         if (yaFueRecompensado)
         {
             if (!string.IsNullOrEmpty(mensajeYaInspeccionado))
@@ -50,13 +57,19 @@ public class ObjetoInspeccionable : MonoBehaviour
             return;
         }
 
-        // Mostrar el texto principal de la inspecciÛn
+        // Caso 2: Si este contenedor tiene un modelo 3D propio, lo abre en la UI de inspecci√≥n
+        if (prefabModelo3DObjeto != null && InspeccionObjeto3D.Instance != null)
+        {
+            InspeccionObjeto3D.Instance.AbrirInspeccion(prefabModelo3DObjeto, name);
+        }
+
+        // Mostrar el texto principal de la inspecci√≥n
         if (!string.IsNullOrEmpty(mensajeInspeccion))
         {
             RecetaManager.Instance.ShowDialog(mensajeInspeccion);
         }
 
-        // Caso 2: Tiene una recompensa para entregar
+        // Caso 3: Tiene una recompensa para entregar
         if (prefabRecompensa != null)
         {
             EntregarRecompensa();
@@ -65,7 +78,7 @@ public class ObjetoInspeccionable : MonoBehaviour
             {
                 yaFueRecompensado = true;
 
-                // Registrar en el SceneStateManager que esta grieta ya entregÛ la recompensa
+                // Registrar en el SceneStateManager que esta grieta ya entreg√≥ la recompensa
                 if (!string.IsNullOrEmpty(uniqueID) && SceneStateManager.Instance != null)
                 {
                     SceneStateManager.Instance.RegistrarObjetoRecogido(uniqueID);
@@ -79,11 +92,22 @@ public class ObjetoInspeccionable : MonoBehaviour
         GameObject nuevoObjetoObj = Instantiate(prefabRecompensa);
         objetoInteractuable nuevoObjeto = nuevoObjetoObj.GetComponent<objetoInteractuable>();
 
-        if (nuevoObjeto != null && barraInventario.Instance != null)
+        if (nuevoObjeto != null)
         {
-            Vector3 slotPosition = barraInventario.Instance.GetNextFreeSlot(nuevoObjeto);
-            nuevoObjeto.transform.position = slotPosition;
-            DontDestroyOnLoad(nuevoObjetoObj);
+            // üëà Si le asignaste un modelo 3D espec√≠fico para la recompensa desde este script, se lo inyectamos al objeto
+            if (prefabModelo3DRecompensa != null)
+            {
+                nuevoObjeto.prefabModelo3DInspeccion = prefabModelo3DRecompensa;
+            }
+
+            if (barraInventario.Instance != null)
+            {
+                Vector3 slotPosition = barraInventario.Instance.GetNextFreeSlot(nuevoObjeto);
+                slotPosition.z = -2f;
+                nuevoObjeto.transform.position = slotPosition;
+
+                DontDestroyOnLoad(nuevoObjetoObj);
+            }
         }
     }
 }
