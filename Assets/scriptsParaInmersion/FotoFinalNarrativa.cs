@@ -1,15 +1,15 @@
 using System.Collections;
 using UnityEngine;
-using DG.Tweening; // Importante para animar la foto de forma suave
+using DG.Tweening;
 
 public class FotoFinalNarrativa : MonoBehaviour
 {
     [Header("Animación de la Foto")]
-    [Tooltip("Escala a la que aumentará la foto al hacer clic (ej. 1.5 o 2.0)")]
+    [Tooltip("Escala a la que aumentará la foto al hacer clic")]
     public Vector3 escalaFinal = new Vector3(1.5f, 1.5f, 1f);
     [Tooltip("Duración de la animación de zoom")]
     public float duracionAnimacion = 0.8f;
-    [Tooltip("Posición central en pantalla a la que se moverá la foto (opcional)")]
+    [Tooltip("Posición central en pantalla a la que se moverá la foto")]
     public Vector3 posicionCentral = new Vector3(0f, 0f, -2f);
 
     [Header("Diálogo Narrativo")]
@@ -19,22 +19,11 @@ public class FotoFinalNarrativa : MonoBehaviour
     [Header("Escena Final")]
     [Tooltip("Nombre EXACTO de la escena final a la que cambiará")]
     public string nombreEscenaFinal = "EscenaFinal";
-    [Tooltip("Tiempo que espera en negro antes de cargar el final")]
-    public float esperaFadeOut = 1.0f;
 
     private bool interactuado = false;
-    private Vector3 escalaInicial;
-    private Vector3 posicionInicial;
-
-    private void Start()
-    {
-        escalaInicial = transform.localScale;
-        posicionInicial = transform.position;
-    }
 
     private void OnMouseDown()
     {
-        // Evitamos que el jugador haga clic múltiples veces
         if (interactuado) return;
         interactuado = true;
 
@@ -48,21 +37,30 @@ public class FotoFinalNarrativa : MonoBehaviour
         secuenciaFoto.Join(transform.DOScale(escalaFinal, duracionAnimacion).SetEase(Ease.OutBack));
         secuenciaFoto.Join(transform.DOMove(posicionCentral, duracionAnimacion).SetEase(Ease.OutQuad));
 
-        // Esperar a que la animación de la foto termine
-        yield return secuenciaFoto.WaitForCompletion();
+        // SOLUCIÓN 1: Reemplazamos WaitForCompletion por WaitForSeconds. 
+        // A veces WaitForCompletion bugea las corrutinas en ciertas versiones de DOTween.
+        yield return new WaitForSeconds(duracionAnimacion + 0.2f);
 
-        // 2. MOSTRAR EL DIÁLOGO (Usando RecetaManager y su máquina de escribir)
-        if (RecetaManager.Instance != null && !string.IsNullOrEmpty(mensajeFoto))
+        // 2. MOSTRAR EL DIÁLOGO
+        if (RecetaManager.Instance != null)
         {
-            RecetaManager.Instance.ShowDialog(mensajeFoto);
+            if (!string.IsNullOrEmpty(mensajeFoto))
+            {
+                RecetaManager.Instance.ShowDialog(mensajeFoto);
+            }
+        }
+        else
+        {
+            // SOLUCIÓN 2: Aviso por consola si falta el Gestor
+            Debug.LogError("¡ATENCIÓN! No se encontró el RecetaManager en esta escena. El texto no puede mostrarse.");
         }
 
         // 3. ESPERAR A QUE EL JUGADOR LEA Y HAGA CLIC PARA CONTINUAR
-        // Esperamos a que vuelva a hacer clic con el ratón o presione Espacio/Enter
-        yield return new WaitForSeconds(0.5f); // Breve margen para no saltárselo por error
+        // Damos 1 segundo de gracia para que no lo cierre por accidente al hacer doble clic
+        yield return new WaitForSeconds(1.0f);
         yield return new WaitUntil(() => Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return));
 
-        // Ocultar el diálogo si estaba activo
+        // Ocultar el diálogo
         if (RecetaManager.Instance != null)
         {
             RecetaManager.Instance.CloseDialog();
@@ -73,12 +71,10 @@ public class FotoFinalNarrativa : MonoBehaviour
         {
             if (SceneChanger.Instance != null)
             {
-                // Ejecuta el Fade Out, reproduce pasos/sonido si los tiene y carga la escena final
                 SceneChanger.Instance.CambiarAEscena(nombreEscenaFinal);
             }
             else
             {
-                // Respaldo directo si no está el SceneChanger
                 UnityEngine.SceneManagement.SceneManager.LoadScene(nombreEscenaFinal);
             }
         }

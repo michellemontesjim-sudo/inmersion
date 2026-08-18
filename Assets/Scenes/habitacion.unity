@@ -1669,8 +1669,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1306334184}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &519420033
@@ -2533,7 +2532,7 @@ MonoBehaviour:
     resultId: velaDerretida
     resultSprite: {fileID: 21300000, guid: 9785e9170d778e240b4ca1b54cb249ea, type: 3}
     resultPrefab3D: {fileID: 0}
-    destroyItemA: 0
+    destroyItemA: 1
     destroyItemB: 1
     descriptionMessage: "Al derretirse la vela, notas algo brillando entre la cera...
       \xA1es la mitad de una llave!"
@@ -2655,7 +2654,8 @@ Transform:
   m_LocalPosition: {x: 2.1321225, y: 0.007967735, z: 0.023254843}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1306334184}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &874338253
@@ -3157,11 +3157,11 @@ Transform:
   m_GameObject: {fileID: 1306334183}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0.16290012, y: -2.3, z: 2}
+  m_LocalPosition: {x: -1.9692224, y: -2.3079677, z: -8.023254}
   m_LocalScale: {x: 1, y: 1, z: 2.3892462}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 519420032}
+  m_Father: {fileID: 874338252}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
 --- !u!199 &1306334185
 ParticleSystemRenderer:
@@ -3209,7 +3209,7 @@ ParticleSystemRenderer:
   m_MeshDistribution: 0
   m_SortMode: 0
   m_MinParticleSize: 0
-  m_MaxParticleSize: 0.5
+  m_MaxParticleSize: 25.82
   m_CameraVelocityScale: 0
   m_VelocityScale: 0
   m_LengthScale: 2
