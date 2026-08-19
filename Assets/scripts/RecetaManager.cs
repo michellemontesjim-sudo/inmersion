@@ -53,6 +53,46 @@ public class RecetaManager : MonoBehaviour
     [Header("Referencias de Canvas / UI")]
     public GameObject canvasDialogo;
 
+    private bool estaEscribiendo = false;
+    private bool esperandoClicParaCerrar = false;
+    private string mensajeActual = "";
+
+    private void Update()
+    {
+        // Si el panel de diálogo está activo y el jugador hace clic izquierdo o presiona Espacio/Enter
+        if (dialogPanel != null && dialogPanel.activeSelf)
+        {
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+            {
+                if (estaEscribiendo)
+                {
+                    // 1. Clic MIENTRAS se escribe: Completa el texto de golpe
+                    CompletarTextoInmediatamente();
+                }
+                else if (esperandoClicParaCerrar)
+                {
+                    // 2. Clic CUANDO ya se terminó de escribir: Cierra el diálogo de inmediato
+                    CloseDialog();
+                }
+            }
+        }
+    }
+
+    public void CompletarTextoInmediatamente()
+    {
+        if (typingCoroutine != null) StopCoroutine(typingCoroutine);
+
+        dialogText.text = mensajeActual;
+        estaEscribiendo = false;
+        esperandoClicParaCerrar = true;
+
+        if (autoHide)
+        {
+            if (hideCoroutine != null) StopCoroutine(hideCoroutine);
+            hideCoroutine = StartCoroutine(HideDialogAfterDelay(displayDuration));
+        }
+    }
+
     private void Awake()
     {
         if (Instance == null)
@@ -121,6 +161,17 @@ public class RecetaManager : MonoBehaviour
 
     public void CloseDialog()
     {
+        //if (dialogPanel != null)
+        //{
+        //dialogPanel.SetActive(false);
+        //}
+
+        estaEscribiendo = false;
+        esperandoClicParaCerrar = false;
+
+        if (typingCoroutine != null) StopCoroutine(typingCoroutine);
+        if (hideCoroutine != null) StopCoroutine(hideCoroutine);
+
         if (dialogPanel != null)
         {
             dialogPanel.SetActive(false);

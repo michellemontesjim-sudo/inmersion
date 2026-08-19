@@ -28,8 +28,18 @@ public class SecuenciaFlashback : MonoBehaviour
     private bool esperandoClic = false;
     private Coroutine corrutinaEscritura;
 
+    [Header("Ocultar Navegación (Opcional)")]
+    [Tooltip("Panel o Canvas con los botones de cambio de habitación que deseas ocultar durante el flashback")]
+    public GameObject panelNavegacionHabitaciones;
+
     private void Start()
     {
+        // Desactivar los botones al comenzar el flashback
+        if (panelNavegacionHabitaciones != null)
+        {
+            panelNavegacionHabitaciones.SetActive(false);
+        }
+
         if (indicadorClicUI != null)
             indicadorClicUI.SetActive(false);
 

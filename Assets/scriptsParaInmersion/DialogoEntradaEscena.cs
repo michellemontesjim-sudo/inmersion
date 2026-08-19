@@ -43,7 +43,7 @@ public class DialogoEntradaEscena : MonoBehaviour
         // Espera el tiempo configurado (permite que la pantalla termine el Fade In)
         yield return new WaitForSeconds(delayInicial);
 
-        // Muestra el diálogo en pantalla con tu RecetaManager (incluyendo la máquina de escribir)
+        // Muestra el diálogo en pantalla con tu RecetaManager
         if (RecetaManager.Instance != null && !string.IsNullOrEmpty(mensajeEntrada))
         {
             RecetaManager.Instance.ShowDialog(mensajeEntrada);

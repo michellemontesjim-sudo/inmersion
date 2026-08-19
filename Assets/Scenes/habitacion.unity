@@ -579,17 +579,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 155110976}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 9.93348}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2096709230}
-  m_Father: {fileID: 929617704}
+  m_Father: {fileID: 1848302122}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 816.65, y: 301.09}
+  m_AnchoredPosition: {x: 1778.1426, y: 841.1731}
   m_SizeDelta: {x: 218.71, y: 43.81}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &155110978
@@ -1049,17 +1049,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 286675231}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 9.93348}
   m_LocalScale: {x: 1.5657, y: 1.5657, z: 1.5657}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 793776424}
-  m_Father: {fileID: 929617704}
+  m_Father: {fileID: 1848302122}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 796, y: 182}
+  m_AnchoredPosition: {x: 1757.4924, y: 722.0831}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &286675233
@@ -1298,11 +1298,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cccd41ca230fe63429559c35d8db19cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panelNegro: {fileID: 1381528142}
-  audioSource: {fileID: 349027746}
+  audioSourcePasos: {fileID: 349027746}
   sonidoPasos: {fileID: 8300000, guid: 2f58dd51ccea9ed4c8c46fb1e251e760, type: 3}
+  panelFade: {fileID: 1381528142}
   duracionFade: 0.8
-  tiempoPasos: 1.5
 --- !u!4 &349027745
 Transform:
   m_ObjectHideFlags: 0
@@ -2513,7 +2512,7 @@ MonoBehaviour:
   dialogText: {fileID: 1323458323}
   dialogPanel: {fileID: 622967056}
   autoHide: 1
-  displayDuration: 3
+  displayDuration: 2.5
   velocidadEscritura: 0.04
   audioSourceDialogo: {fileID: 874338253}
   sonidoTecleo: {fileID: 8300000, guid: d28408d0fcc22b84a8fc0deb843146bc, type: 3}
@@ -2531,7 +2530,7 @@ MonoBehaviour:
     itemB: encendedor
     resultId: velaDerretida
     resultSprite: {fileID: 21300000, guid: 9785e9170d778e240b4ca1b54cb249ea, type: 3}
-    resultPrefab3D: {fileID: 0}
+    resultPrefab3D: {fileID: 919132149155446097, guid: fad487aeaf978b8498366e31f8629883, type: 3}
     destroyItemA: 1
     destroyItemB: 1
     descriptionMessage: "Al derretirse la vela, notas algo brillando entre la cera...
@@ -2849,14 +2848,12 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 622967057}
-  - {fileID: 155110977}
-  - {fileID: 1129441783}
   - {fileID: 28605203}
-  - {fileID: 286675232}
   - {fileID: 1381528145}
   - {fileID: 282906807}
   - {fileID: 167102206}
   - {fileID: 709881886}
+  - {fileID: 1848302122}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2890,17 +2887,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1129441782}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 9.93348}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2019015109}
-  m_Father: {fileID: 929617704}
+  m_Father: {fileID: 1848302122}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -781.3185, y: 306.09}
+  m_AnchoredPosition: {x: 180.17407, y: 846.1731}
   m_SizeDelta: {x: 223.363, y: 53.815}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1129441784
@@ -8019,15 +8016,15 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: a811a4dd8d4c64f4da402f084f425336, type: 2}
+  m_sharedMaterial: {fileID: -7921993489177454965, guid: a811a4dd8d4c64f4da402f084f425336, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -8243,6 +8240,40 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 176992017}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1848302121
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1848302122}
+  m_Layer: 0
+  m_Name: botones
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1848302122
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1848302121}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -961.4925, y: -540.0831, z: -9.93348}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 155110977}
+  - {fileID: 1129441783}
+  - {fileID: 286675232}
+  m_Father: {fileID: 929617704}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1855768041
 GameObject:

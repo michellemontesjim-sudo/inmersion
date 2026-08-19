@@ -1,104 +1,138 @@
-using System.Collections;
+ï»¿using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using DG.Tweening;
 
 public class SceneChanger : MonoBehaviour
 {
     public static SceneChanger Instance;
 
-    [Header("Referencias Visuales y de Audio")]
-    public CanvasGroup panelNegro;      // El CanvasGroup de la imagen negra en UI
-    public AudioSource audioSource;    // Componente AudioSource
-    public AudioClip sonidoPasos;      // Sonido de pasos
+    [Header("Efectos de Sonido")]
+    public AudioSource audioSourcePasos;
+    public AudioClip sonidoPasos;
 
-    [Header("Configuración de Tiempos")]
-    public float duracionFade = 0.8f;   // Tiempo de oscurecimiento y aclarado
-    public float tiempoPasos = 1.0f;    // Cuánto tiempo duran los pasos a oscuras
+    [Header("TransiciÃ³n Fade")]
+    public CanvasGroup panelFade; // Panel negro para Fade In / Fade Out
+    public float duracionFade = 0.5f;
+
+    private bool realizandoTransicion = false;
 
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Evita que se destruya entre escenas
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            Destroy(gameObject); // Destruye duplicados al recargar
+            Destroy(gameObject);
         }
     }
 
     private void Start()
     {
-        // Si hay un panel asignado, inicia la escena haciendo un Fade In
-        if (panelNegro != null)
+        // Al iniciar el juego, aclara la pantalla y asegura que estÃ© enfocada
+        if (panelFade != null)
         {
-            panelNegro.alpha = 1f;
-            panelNegro.DOFade(0f, duracionFade);
-        }
-    }
-
-    // Este método es el que llamarás desde los botones de UI o activadores
-    public void CambiarAEscena(string nombreEscena)
-    {
-        Debug.Log("Intentando cargar la escena con transición: " + nombreEscena);
-        StartCoroutine(SecuenciaCambioHabitacion(nombreEscena));
-    }
-
-    private IEnumerator SecuenciaCambioHabitacion(string nombreEscena)
-    {
-        // 1. Fade Out: Oscurecer la pantalla gradualmente
-        if (panelNegro != null)
-        {
-            panelNegro.DOFade(1f, duracionFade);
+            StartCoroutine(AclararPantallaInmediato());
         }
 
-        // Esperar a que la pantalla quede negra
-        yield return new WaitForSeconds(duracionFade);
-
-        // 2. Reproducir el audio de pasos durante la oscuridad
-        if (audioSource != null && sonidoPasos != null)
-        {
-            audioSource.PlayOneShot(sonidoPasos);
-            yield return new WaitForSeconds(tiempoPasos);
-        }
-
-        // 3. Cargar la escena
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(nombreEscena);
-
-        // Espera a que la escena se termine de cargar por completo en memoria
-        while (!asyncLoad.isDone)
-        {
-            yield return null;
-        }
-
-        // 4. Fade In: Aclarar la pantalla suavemente al entrar a la nueva habitación
-        if (panelNegro != null)
-        {
-            panelNegro.DOFade(0f, duracionFade);
-        }
+        QuitarDesenfoqueSiExiste();
     }
 
     private void OnEnable()
     {
-        // Escucha cada vez que Unity carga una escena nueva
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded += AlCargarNuevaEscena;
+        SceneManager.sceneLoaded += AlCargarNuevaEscena;
     }
 
     private void OnDisable()
     {
-        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= AlCargarNuevaEscena;
+        SceneManager.sceneLoaded -= AlCargarNuevaEscena;
     }
 
-    private void AlCargarNuevaEscena(UnityEngine.SceneManagement.Scene escena, UnityEngine.SceneManagement.LoadSceneMode modo)
+    // Se ejecuta automÃ¡ticamente cada vez que Unity termina de cargar una escena
+    private void AlCargarNuevaEscena(Scene escena, LoadSceneMode modo)
     {
-        // Busca si en la nueva escena existe un controlador de Focus
+        // 1. Quitar la pantalla negra
+        if (panelFade != null)
+        {
+            StartCoroutine(AclararPantallaInmediato());
+        }
+
+        // 2. ðŸ‘ˆ RECUPERADO: Quitar el efecto borroso
+        QuitarDesenfoqueSiExiste();
+    }
+
+    private void QuitarDesenfoqueSiExiste()
+    {
         EfectoFocusUI focus = FindObjectOfType<EfectoFocusUI>();
         if (focus != null)
         {
             focus.DesactivarDesenfoqueInmediato();
         }
+    }
+
+    public void CambiarAEscena(string nombreEscenaDestino)
+    {
+        if (realizandoTransicion) return;
+
+        // VALIDADOR ANTI-BUG: Si ya estamos en esa escena, no hace nada
+        if (SceneManager.GetActiveScene().name == nombreEscenaDestino)
+        {
+            return;
+        }
+
+        StartCoroutine(SecuenciaCambioEscena(nombreEscenaDestino));
+    }
+
+    private IEnumerator SecuenciaCambioEscena(string nombreEscenaDestino)
+    {
+        realizandoTransicion = true;
+
+        if (audioSourcePasos != null && sonidoPasos != null)
+        {
+            audioSourcePasos.PlayOneShot(sonidoPasos);
+        }
+
+        if (panelFade != null)
+        {
+            panelFade.blocksRaycasts = true;
+            float tiempo = 0;
+            while (tiempo < duracionFade)
+            {
+                tiempo += Time.deltaTime;
+                panelFade.alpha = Mathf.Lerp(0f, 1f, tiempo / duracionFade);
+                yield return null;
+            }
+            panelFade.alpha = 1f;
+        }
+
+        AsyncOperation carga = SceneManager.LoadSceneAsync(nombreEscenaDestino);
+        while (!carga.isDone)
+        {
+            yield return null;
+        }
+
+        yield return StartCoroutine(AclararPantallaInmediato());
+
+        realizandoTransicion = false;
+    }
+
+    private IEnumerator AclararPantallaInmediato()
+    {
+        if (panelFade == null) yield break;
+
+        float tiempo = 0;
+        float alphaInicial = panelFade.alpha;
+
+        while (tiempo < duracionFade)
+        {
+            tiempo += Time.deltaTime;
+            panelFade.alpha = Mathf.Lerp(alphaInicial, 0f, tiempo / duracionFade);
+            yield return null;
+        }
+
+        panelFade.alpha = 0f;
+        panelFade.blocksRaycasts = false;
     }
 }
