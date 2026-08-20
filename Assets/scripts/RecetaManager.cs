@@ -1,61 +1,105 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-
 
 [System.Serializable]
 public struct Receta
 {
     public string itemA;
     public string itemB;
-    public string resultId;     // El nuevo ID del objeto (Ej: "VelaEncendida")
-    public Sprite resultSprite; // La nueva imagen para la escena
+    public string resultId;
+    public Sprite resultSprite;
+
+    [Header("Inspecci√≥n 3D del Objeto Resultante")]
+    public GameObject resultPrefab3D;
 
     [Header("Opciones de Consumo")]
-    public bool destroyItemA; // øEl objeto arrastrado desaparece? (Por defecto: true)
-    public bool destroyItemB; // øEl objeto receptor desaparece? (Ejemplo: la caja/mesa -> false)
+    public bool destroyItemA;
+    public bool destroyItemB;
 
     [Header("Recompensa / Mensaje Opcional")]
     [TextArea(2, 4)]
-    public string descriptionMessage;      // Texto ej: "°Parece que dentro habÌa la mitad de una llave!"
-    public GameObject extraRewardPrefab;    // Prefab del objeto que ir· al inventario (ej: MitadLlave)
-
-
+    public string descriptionMessage;
+    public GameObject extraRewardPrefab;
 }
+
 public class RecetaManager : MonoBehaviour
 {
     public static RecetaManager Instance;
 
-
-    [Header("UI de Texto / Di·logo")]
+    [Header("UI de Texto / Di√°logo")]
     public TextMeshProUGUI dialogText;
     public GameObject dialogPanel;
 
-    [Header("ConfiguraciÛn de Di·logo")]
-    public bool autoHide = false;        // Marcar si quieres que se cierre solo
-    public float displayDuration = 3.5f; // Segundos que dura en pantalla si autoHide es true
+    [Header("Configuraci√≥n de Di√°logo")]
+    public bool autoHide = false;
+    public float displayDuration = 3.5f;
+
+    [Header("Efecto M√°quina de Escribir")]
+    [Tooltip("Tiempo de espera entre cada letra (menor = m√°s r√°pido)")]
+    public float velocidadEscritura = 0.04f;
+    [Tooltip("AudioSource para reproducir el sonido (puede ser el mismo del panel)")]
+    public AudioSource audioSourceDialogo;
+    [Tooltip("Clip de sonido corto (un 'blip', 'tick' o tecla)")]
+    public AudioClip sonidoTecleo;
+
     private Coroutine hideCoroutine;
+    private Coroutine typingCoroutine; // Controla la corrutina de escritura
 
     [Header("Lista de Recetas")]
-    public List<Receta> recetas;
-
+    public List<Receta> recetas = new List<Receta>();
 
     [Header("Referencias de Canvas / UI")]
     public GameObject canvasDialogo;
+
+    private bool estaEscribiendo = false;
+    private bool esperandoClicParaCerrar = false;
+    private string mensajeActual = "";
+
+    private void Update()
+    {
+        // Si el panel de di√°logo est√° activo y el jugador hace clic izquierdo o presiona Espacio/Enter
+        if (dialogPanel != null && dialogPanel.activeSelf)
+        {
+            if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+            {
+                if (estaEscribiendo)
+                {
+                    // 1. Clic MIENTRAS se escribe: Completa el texto de golpe
+                    CompletarTextoInmediatamente();
+                }
+                else if (esperandoClicParaCerrar)
+                {
+                    // 2. Clic CUANDO ya se termin√≥ de escribir: Cierra el di√°logo de inmediato
+                    CloseDialog();
+                }
+            }
+        }
+    }
+
+    public void CompletarTextoInmediatamente()
+    {
+        if (typingCoroutine != null) StopCoroutine(typingCoroutine);
+
+        dialogText.text = mensajeActual;
+        estaEscribiendo = false;
+        esperandoClicParaCerrar = true;
+
+        if (autoHide)
+        {
+            if (hideCoroutine != null) StopCoroutine(hideCoroutine);
+            hideCoroutine = StartCoroutine(HideDialogAfterDelay(displayDuration));
+        }
+    }
+
     private void Awake()
     {
-        
-        // PatrÛn Singleton con Persistencia entre Escenas
         if (Instance == null)
         {
             Instance = this;
-
-            // No destruye este gestor
             DontDestroyOnLoad(gameObject);
 
-            // °ESTA ES LA CLAVE! Tampoco destruye el Canvas que le asignaste
             if (canvasDialogo != null)
             {
                 DontDestroyOnLoad(canvasDialogo);
@@ -68,43 +112,72 @@ public class RecetaManager : MonoBehaviour
         }
         else
         {
-            // Si regresamos a una escena anterior y ya existen, destruimos los duplicados
             if (canvasDialogo != null) Destroy(canvasDialogo);
             Destroy(gameObject);
         }
     }
 
-    // Muestra el mensaje en pantalla (VERSI”N ⁄NICA Y COMPLETA)
     public void ShowDialog(string message)
     {
         if (dialogPanel == null || dialogText == null) return;
 
-        // Cancelar el conteo previo si ya habÌa un texto mostr·ndose
-        if (hideCoroutine != null)
+        // 1. Detener cualquier di√°logo previo que se est√© escribiendo u ocultando
+        if (hideCoroutine != null) StopCoroutine(hideCoroutine);
+        if (typingCoroutine != null) StopCoroutine(typingCoroutine);
+
+        dialogPanel.SetActive(true);
+        dialogText.text = ""; // Limpiar el texto antes de empezar
+
+        // 2. Iniciar el efecto de m√°quina de escribir
+        typingCoroutine = StartCoroutine(EfectoMaquinaDeEscribir(message));
+    }
+
+    private IEnumerator EfectoMaquinaDeEscribir(string message)
+    {
+        dialogText.text = "";
+
+        // Convertimos el mensaje en un arreglo de letras y lo recorremos uno por uno
+        foreach (char letra in message.ToCharArray())
         {
-            StopCoroutine(hideCoroutine);
+            dialogText.text += letra;
+
+            // Reproducimos el sonido de la letra (omitimos el sonido en los espacios en blanco)
+            if (audioSourceDialogo != null && sonidoTecleo != null && letra != ' ')
+            {
+                // PlayOneShot permite que el sonido se superponga suavemente si se escribe muy r√°pido
+                audioSourceDialogo.PlayOneShot(sonidoTecleo);
+            }
+
+            // Esperamos una fracci√≥n de segundo antes de la siguiente letra
+            yield return new WaitForSeconds(velocidadEscritura);
         }
 
-        dialogText.text = message;
-        dialogPanel.SetActive(true);
-
-        // Si est· configurado para ocultarse solo, iniciamos el conteo
+        // 3. Una vez que termina de escribir TODAS las letras, inicia el conteo para ocultarse
         if (autoHide)
         {
             hideCoroutine = StartCoroutine(HideDialogAfterDelay(displayDuration));
         }
     }
 
-    // FunciÛn para Ocultar el Di·logo (Llamada manualmente o por botÛn)
     public void CloseDialog()
     {
+        //if (dialogPanel != null)
+        //{
+        //dialogPanel.SetActive(false);
+        //}
+
+        estaEscribiendo = false;
+        esperandoClicParaCerrar = false;
+
+        if (typingCoroutine != null) StopCoroutine(typingCoroutine);
+        if (hideCoroutine != null) StopCoroutine(hideCoroutine);
+
         if (dialogPanel != null)
         {
             dialogPanel.SetActive(false);
         }
     }
 
-    // Corrutina que espera X segundos para cerrar el panel
     private IEnumerator HideDialogAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
@@ -113,6 +186,8 @@ public class RecetaManager : MonoBehaviour
 
     public void TryCombine(objetoInteractuable item1, objetoInteractuable item2)
     {
+        if (item1 == null || item2 == null) return;
+
         foreach (Receta recipe in recetas)
         {
             bool isDirectMatch = (item1.itemId == recipe.itemA && item2.itemId == recipe.itemB);
@@ -120,46 +195,38 @@ public class RecetaManager : MonoBehaviour
 
             if (isDirectMatch || isReverseMatch)
             {
-                // Mapeamos los objetos para saber SIEMPRE cu·l es el Õtem A y cu·l el Õtem B de la receta,
-                // sin importar cu·l arrastrÛ el jugador sobre cu·l.
                 objetoInteractuable objectA = isDirectMatch ? item1 : item2;
                 objetoInteractuable objectB = isDirectMatch ? item2 : item1;
 
-                // 1. PERSISTENCIA
-                // Guardamos que ambos objetos originales ya fueron procesados en la historia
                 PersistentObject pA = objectA.GetComponent<PersistentObject>();
                 if (pA != null) pA.MarcarComoRecogido();
 
                 PersistentObject pB = objectB.GetComponent<PersistentObject>();
                 if (pB != null) pB.MarcarComoRecogido();
 
-                // 2. TRANSFORMACI”N
-                // Aplicamos la actualizaciÛn de ID y Sprite al objeto que NO se vaya a destruir
                 if (!string.IsNullOrEmpty(recipe.resultId))
                 {
                     objetoInteractuable objetoResultado = null;
 
                     if (!recipe.destroyItemA)
                     {
-                        objectA.UpdateItem(recipe.resultId, recipe.resultSprite);
+                        objectA.UpdateItem(recipe.resultId, recipe.resultSprite, recipe.resultPrefab3D);
                         DontDestroyOnLoad(objectA.gameObject);
                         objetoResultado = objectA;
                     }
                     else if (!recipe.destroyItemB)
                     {
-                        objectB.UpdateItem(recipe.resultId, recipe.resultSprite);
+                        objectB.UpdateItem(recipe.resultId, recipe.resultSprite, recipe.resultPrefab3D);
                         DontDestroyOnLoad(objectB.gameObject);
                         objetoResultado = objectB;
                     }
 
-                    // Si el objeto resultante en la mesa/inventario pasa a ser el Ìtem clave:
                     if (objetoResultado != null && barraInventario.Instance != null)
                     {
                         barraInventario.Instance.VerificarYDesbloquearBoton(objetoResultado);
                     }
                 }
 
-                // 3. DI¡LOGOS Y RECOMPENSAS
                 if (!string.IsNullOrEmpty(recipe.descriptionMessage))
                 {
                     ShowDialog(recipe.descriptionMessage);
@@ -170,25 +237,16 @@ public class RecetaManager : MonoBehaviour
                     GiveRewardToInventory(recipe.extraRewardPrefab);
                 }
 
-                // 4. DESTRUCCI”N SEG⁄N LA RECETA
-                if (recipe.destroyItemA && objectA != null)
-                {
-                    Destroy(objectA.gameObject);
-                }
-
-                if (recipe.destroyItemB && objectB != null)
-                {
-                    Destroy(objectB.gameObject);
-                }
+                if (recipe.destroyItemA && objectA != null) Destroy(objectA.gameObject);
+                if (recipe.destroyItemB && objectB != null) Destroy(objectB.gameObject);
 
                 return;
             }
         }
 
-        
+        Debug.Log("No existe ninguna receta que combine: " + item1.itemId + " con " + item2.itemId);
     }
 
-    // Instancia el objeto y lo coloca en el inventario autom·ticamente
     private void GiveRewardToInventory(GameObject rewardPrefab)
     {
         GameObject newItemObj = Instantiate(rewardPrefab);
@@ -202,4 +260,3 @@ public class RecetaManager : MonoBehaviour
         }
     }
 }
-

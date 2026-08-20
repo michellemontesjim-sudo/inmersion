@@ -14,6 +14,14 @@ public class objetoInteractuable : MonoBehaviour
     private Vector3 initialPosition;
     private bool isDragging = false;
 
+    // Variables para detectar si es Clic o Arrastre
+    private Vector3 clickStartPosition;
+    private float dragThreshold = 0.2f; // Distancia mínima para considerar que se está arrastrando
+
+    [Header("Inspección 3D")]
+    [Tooltip("Prefab del modelo 3D detallado que se mostrará en pantalla grande")]
+    public GameObject prefabModelo3DInspeccion;
+    public GameObject newPrefab3D;
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -25,7 +33,7 @@ public class objetoInteractuable : MonoBehaviour
         AdjustColliderSize();
     }
 
-    public void UpdateItem(string newId, Sprite newSprite)
+    public void UpdateItem(string newId, Sprite newSprite, GameObject newPrefab3D = null)
     {
         itemId = newId;
 
@@ -37,8 +45,12 @@ public class objetoInteractuable : MonoBehaviour
             spriteRenderer.sprite = newSprite;
             AdjustColliderSize();
 
-            // Nos aseguramos de que el collider quede activo tras cambiar el sprite
             if (boxCollider != null) boxCollider.enabled = true;
+        }
+
+        if (newPrefab3D != null)
+        {
+            prefabModelo3DInspeccion = newPrefab3D;
         }
     }
 
@@ -56,11 +68,19 @@ public class objetoInteractuable : MonoBehaviour
         // Guardamos la posición inicial respetando el plano frontal Z = -2
         initialPosition = new Vector3(transform.position.x, transform.position.y, -2f);
         transform.position = initialPosition;
-        isDragging = true;
+
+        clickStartPosition = Input.mousePosition;
+        isDragging = false;
     }
 
     void OnMouseDrag()
     {
+        // Solo activamos el arrastre si el ratón se movió más allá del umbral
+        if (Vector3.Distance(clickStartPosition, Input.mousePosition) > dragThreshold)
+        {
+            isDragging = true;
+        }
+
         if (isDragging)
         {
             Camera currentCam = Camera.main;
@@ -68,7 +88,6 @@ public class objetoInteractuable : MonoBehaviour
             if (currentCam != null)
             {
                 Vector3 mousePos = currentCam.ScreenToWorldPoint(Input.mousePosition);
-                // FORZAMOS Z = -2f para que el ítem vuele POR ENCIMA del escenario y UI al arrastrar
                 mousePos.z = -2f;
                 transform.position = mousePos;
             }
@@ -77,8 +96,40 @@ public class objetoInteractuable : MonoBehaviour
 
     void OnMouseUp()
     {
+        // CASO 1: Si NO se arrastró, fue un CLIC SIMPLE -> Abrir Inspección 3D
+        if (!isDragging)
+        {
+            AbrirInspeccion();
+            return;
+        }
+
+        // CASO 2: Si SÍ se arrastró -> Ejecutar la lógica de combinación o guardado
         isDragging = false;
         CheckCombination();
+    }
+
+    private void AbrirInspeccion()
+    {
+        // Verificamos si el ítem ya está guardado en el inventario
+        bool estaEnInventario = false;
+
+        if (barraInventario.Instance != null)
+        {
+            estaEnInventario = barraInventario.Instance.TieneItem(itemId);
+        }
+
+        // Si está en el inventario (o si quieres permitir inspeccionarlo directamente)
+        if (estaEnInventario || transform.parent != null)
+        {
+            if (InspeccionObjeto3D.Instance != null && prefabModelo3DInspeccion != null)
+            {
+                InspeccionObjeto3D.Instance.AbrirInspeccion(prefabModelo3DInspeccion, itemId);
+            }
+            else
+            {
+                Debug.LogWarning("InspeccionObjeto3D.Instance o el prefabModelo3DInspeccion no están asignados.");
+            }
+        }
     }
 
     void CheckCombination()
@@ -94,7 +145,6 @@ public class objetoInteractuable : MonoBehaviour
                 if (inventory != null)
                 {
                     Vector3 slotPos = inventory.GetNextFreeSlot(this);
-                    // Aseguramos que el slot conserve el plano frontal (-2)
                     slotPos.z = -2f;
                     transform.position = slotPos;
 
@@ -124,7 +174,6 @@ public class objetoInteractuable : MonoBehaviour
         }
 
         Debug.Log("No se encontró ningún otro objeto válido debajo.");
-        // Si no se soltó en un lugar válido, regresa a su casilla manteniendo la Z correcta
         transform.position = initialPosition;
     }
 }

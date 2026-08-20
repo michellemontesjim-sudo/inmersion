@@ -42,9 +42,14 @@ public class AcertijoTexto : MonoBehaviour
     public string nombreEscenaFinal = "EscenaFinal";
 
     [Tooltip("Segundos de espera mostrando el mensaje/recompensa antes de cambiar de escena.")]
-    public float tiempoEsperaTransicion = 3.0f;
+    public float tiempoEsperaTransicion = 3.5f;
 
     private bool yaResuelto = false;
+
+    public AcertijoInmersivo animadorCamara;
+
+    [Header("Efectos Visuales")]
+    public EfectoFocusUI controladorFocus;
 
     private void Awake()
     {
@@ -89,6 +94,23 @@ public class AcertijoTexto : MonoBehaviour
 
     public void AbrirPanelAcertijo()
     {
+        StartCoroutine(SecuenciaAbrirPanelConZoom());
+    }
+
+    private IEnumerator SecuenciaAbrirPanelConZoom()
+    {
+        if (animadorCamara != null)
+        {
+            animadorCamara.EnfocarObjeto();
+        }
+
+        if (controladorFocus != null)
+        {
+            controladorFocus.ActivarDesenfoque();
+        }
+
+        yield return new WaitForSeconds(1.0f);
+
         if (panelAcertijoUI != null)
         {
             panelAcertijoUI.SetActive(true);
@@ -121,6 +143,16 @@ public class AcertijoTexto : MonoBehaviour
         {
             audioSource.Stop();
         }
+
+        if (animadorCamara != null)
+        {
+            animadorCamara.DesenfoqueObjeto();
+        }
+
+        if (controladorFocus != null)
+        {
+            controladorFocus.DesactivarDesenfoque();
+        }
     }
 
     public void ValidarRespuesta()
@@ -134,31 +166,28 @@ public class AcertijoTexto : MonoBehaviour
         {
             yaResuelto = true;
 
+            // Guardar en la persistencia de escena
             if (!string.IsNullOrEmpty(uniqueID) && SceneStateManager.Instance != null)
             {
                 SceneStateManager.Instance.RegistrarObjetoRecogido(uniqueID);
             }
 
-            if (audioSource != null && audioSource.isPlaying)
-            {
-                audioSource.Stop();
-            }
-
+            // Cerrar el panel del acertijo y quitar zoom/desenfoque
             CerrarPanelAcertijo();
 
-            // 1. Muestra el mensaje de éxito en pantalla
+            // 1. Mostrar el mensaje de éxito mediante el RecetaManager (máquina de escribir)
             if (RecetaManager.Instance != null && !string.IsNullOrEmpty(mensajeExito))
             {
                 RecetaManager.Instance.ShowDialog(mensajeExito);
             }
 
-            // 2. Entrega el objeto al inventario
+            // 2. Entregar objeto recompensa al inventario
             if (prefabRecompensa != null)
             {
                 EntregarRecompensa();
             }
 
-            // 3. Inicia la corrutina que da tiempo a leer antes de cambiar de escena
+            // 3. Si debe ir a la escena final, iniciar la secuencia con espera y Fade Out
             if (irAEscenaFinal && !string.IsNullOrEmpty(nombreEscenaFinal))
             {
                 StartCoroutine(CargarEscenaFinalConDelay());
@@ -190,10 +219,23 @@ public class AcertijoTexto : MonoBehaviour
 
     private IEnumerator CargarEscenaFinalConDelay()
     {
-        // Espera los segundos configurados para que el jugador lea el mensaje y vea la recompensa
+        // Espera los segundos configurados para que el jugador lea el texto y vea la recompensa en el inventario
         yield return new WaitForSeconds(tiempoEsperaTransicion);
 
-        // Carga la escena final directamente (se limpiará la UI automáticamente)
-        SceneManager.LoadScene(nombreEscenaFinal);
+        // Ocultar el cuadro de diálogo antes de la transición
+        if (RecetaManager.Instance != null)
+        {
+            RecetaManager.Instance.CloseDialog();
+        }
+
+        // Cambiar a la escena final con la transición Fade Out de SceneChanger
+        if (SceneChanger.Instance != null)
+        {
+            SceneChanger.Instance.CambiarAEscena(nombreEscenaFinal);
+        }
+        else
+        {
+            SceneManager.LoadScene(nombreEscenaFinal);
+        }
     }
 }
