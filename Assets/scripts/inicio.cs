@@ -11,17 +11,29 @@ public class CinematicIntro : MonoBehaviour
 
     public GameObject botonIniciar;
 
-    public float velocidadFade = 1f;
-    public float tiempoVisible = 3f;
+    [Header("Efecto máquina de escribir")]
+    public float velocidadEscritura = 0.04f;
+    public AudioSource audioSource;
+    public AudioClip sonidoTecleo;
+
+    // Guardamos los textos originales
+    private string textoTitulo;
+    private string textoInfo;
+    private string textoInfo2;
 
     void Start()
     {
-        // Comenzamos con los tres textos invisibles
-        PonerAlpha(titulo, 0);
-        PonerAlpha(info, 0);
-        PonerAlpha(info2, 0);
+        // Guardamos el contenido original
+        textoTitulo = titulo.text;
+        textoInfo = info.text;
+        textoInfo2 = info2.text;
 
-        // Comenzamos con el botón oculto
+        // Ocultamos los textos al comenzar
+        titulo.text = "";
+        info.text = "";
+        info2.text = "";
+
+        // Ocultamos el botón
         botonIniciar.SetActive(false);
 
         StartCoroutine(IniciarCinematica());
@@ -29,72 +41,72 @@ public class CinematicIntro : MonoBehaviour
 
     IEnumerator IniciarCinematica()
     {
-        // APARECE EL TÍTULO
-        yield return StartCoroutine(FadeIn(titulo));
+        // ==========================
+        // TÍTULO
+        // ==========================
+        yield return StartCoroutine(
+            EscribirTexto(titulo, textoTitulo)
+        );
 
-        yield return new WaitForSeconds(tiempoVisible);
+        yield return new WaitForSeconds(3f);
 
-        // DESAPARECE EL TÍTULO
-        yield return StartCoroutine(FadeOut(titulo));
+        titulo.text = "";
 
-        // APARECE EL PRIMER TEXTO
-        yield return StartCoroutine(FadeIn(info));
+        // ==========================
+        // PRIMER TEXTO
+        // ==========================
+        yield return StartCoroutine(
+            EscribirTexto(info, textoInfo)
+        );
 
-        yield return new WaitForSeconds(tiempoVisible);
+        yield return new WaitForSeconds(3f);
 
-        // DESAPARECE EL PRIMER TEXTO
-        yield return StartCoroutine(FadeOut(info));
+        info.text = "";
 
-        // APARECE EL SEGUNDO TEXTO
-        yield return StartCoroutine(FadeIn(info2));
 
-        yield return new WaitForSeconds(tiempoVisible);
+        // ==========================
+        // SEGUNDO TEXTO
+        // ==========================
+        yield return StartCoroutine(
+            EscribirTexto(info2, textoInfo2)
+        );
 
-        // DESAPARECE EL SEGUNDO TEXTO
-        yield return StartCoroutine(FadeOut(info2));
+        yield return new WaitForSeconds(3f);
 
-        // APARECE EL BOTÓN INICIAR
+        info2.text = "";
+
+        // ==========================
+        // BOTÓN
+        // ==========================
         botonIniciar.SetActive(true);
     }
 
-    IEnumerator FadeIn(Text texto)
+    // ==========================
+    // EFECTO MÁQUINA DE ESCRIBIR
+    // ==========================
+    IEnumerator EscribirTexto(Text texto, string contenido)
     {
-        Color color = texto.color;
-        color.a = 0;
-        texto.color = color;
+        texto.text = "";
 
-        while (color.a < 1)
+        foreach (char letra in contenido.ToCharArray())
         {
-            color.a += Time.deltaTime * velocidadFade;
-            texto.color = color;
-            yield return null;
+            texto.text += letra;
+
+            // Sonido por cada letra
+            if (audioSource != null &&
+                sonidoTecleo != null &&
+                letra != ' ')
+            {
+                audioSource.PlayOneShot(sonidoTecleo);
+            }
+
+            yield return new WaitForSeconds(velocidadEscritura);
         }
-
-        color.a = 1;
-        texto.color = color;
     }
 
-    IEnumerator FadeOut(Text texto)
-    {
-        Color color = texto.color;
-
-        while (color.a > 0)
-        {
-            color.a -= Time.deltaTime * velocidadFade;
-            texto.color = color;
-            yield return null;
-        }
-
-        color.a = 0;
-        texto.color = color;
-    }
-
-    void PonerAlpha(Text texto, float alpha)
-    {
-        Color color = texto.color;
-        color.a = alpha;
-        texto.color = color;
-    }
+    // ==========================
+    // BOTÓN INICIAR
+    // ==========================
     public void IniciarJuego()
     {
         SceneManager.LoadScene("habitacion");
