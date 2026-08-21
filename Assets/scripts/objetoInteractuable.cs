@@ -22,10 +22,14 @@ public class objetoInteractuable : MonoBehaviour
     [Tooltip("Prefab del modelo 3D detallado que se mostrará en pantalla grande")]
     public GameObject prefabModelo3DInspeccion;
     public GameObject newPrefab3D;
+    [Header("Sonido de Combinación")]
+    public AudioClip sonidoCombinacion;
+    private AudioSource audioSource;
     void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         boxCollider = GetComponent<BoxCollider2D>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Start()
@@ -165,6 +169,10 @@ public class objetoInteractuable : MonoBehaviour
                     if (barraInventario.Instance != null)
                     {
                         barraInventario.Instance.RemoveFromInventory(this);
+                    }
+                    if (audioSource != null && sonidoCombinacion != null)
+                    {
+                        AudioSource.PlayClipAtPoint(sonidoCombinacion, transform.position);
                     }
 
                     RecetaManager.Instance.TryCombine(this, targetItem);

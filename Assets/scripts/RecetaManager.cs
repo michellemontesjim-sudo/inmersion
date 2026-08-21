@@ -43,6 +43,9 @@ public class RecetaManager : MonoBehaviour
     public AudioSource audioSourceDialogo;
     [Tooltip("Clip de sonido corto (un 'blip', 'tick' o tecla)")]
     public AudioClip sonidoTecleo;
+    [Header("Sonido de Combinación")]
+    public AudioClip sonidoCombinacion;
+    public AudioSource audioSourceCombinacion;
 
     private Coroutine hideCoroutine;
     private Coroutine typingCoroutine; // Controla la corrutina de escritura
@@ -196,6 +199,12 @@ public class RecetaManager : MonoBehaviour
             if (isDirectMatch || isReverseMatch)
             {
                 objetoInteractuable objectA = isDirectMatch ? item1 : item2;
+
+                if (audioSourceCombinacion != null && sonidoCombinacion != null)
+                {
+                    audioSourceCombinacion.PlayOneShot(sonidoCombinacion);
+                }
+
                 objetoInteractuable objectB = isDirectMatch ? item2 : item1;
 
                 PersistentObject pA = objectA.GetComponent<PersistentObject>();
